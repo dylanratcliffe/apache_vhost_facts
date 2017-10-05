@@ -1,6 +1,6 @@
 {
   "name": "dylanratcliffe-apache_vhost_facts",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "author": "dylanratcliffe",
   "summary": "Facts for listing all running Apache VHosts",
   "license": "Apache-2.0",
