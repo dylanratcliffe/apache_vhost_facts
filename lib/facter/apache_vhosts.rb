@@ -1,9 +1,9 @@
 Facter.add(:apache_vhosts) do
   confine { Facter.value(:apache_version) }
 
-  @unnamed_vhost_line     = %r{^(?<ip>.*):(?<port>\d+)\s+(?<name>.*)\s\((?<location>.*)\)}
+  @unnamed_vhost_line     = %r{^(?<ip>.*):(?<port>\d+)\s+(?<name>.*)\s\((?<location>.*):(?<line>\d+)\)}
   @named_first_line       = %r{^(?<ip>.*):(?<port>\d+)\s+is\sa.*}
-  @named_subsequent_lines = %r{^\s+port (?<port>\d+)\snamevhost\s(?<name>.*)\s\((?<location>.*:(?<line>\d+))\)}
+  @named_subsequent_lines = %r{^\s+port (?<port>\d+)\snamevhost\s(?<name>.*)\s\((?<location>.*):(?<line>\d+)\)}
   @default_indicator_line = %r{^\s+default\sserver\s(?<name>.*)\s\(.*\)}
 
   def parse(config)
@@ -16,9 +16,10 @@ Facter.add(:apache_vhosts) do
         # If this is an unnamed vhost we can get all the details
         match = @unnamed_vhost_line.match(line)
         return_val[match[:name]] = {
-          ip:      match[:ip],
-          port:    match[:port],
-          default: true,
+          ip:       match[:ip],
+          port:     match[:port],
+          default:  true,
+          location: match[:location],
         }
       elsif line =~ @named_first_line
         match = @named_first_line.match(line)
@@ -34,9 +35,10 @@ Facter.add(:apache_vhosts) do
       elsif line =~ @named_subsequent_lines
         match = @named_subsequent_lines.match(line)
         return_val[match[:name]] = {
-          ip: header_values[:ip],
-          port: header_values[:port],
-          default: (header_values[:default] == match[:name]),
+          ip:       header_values[:ip],
+          port:     header_values[:port],
+          default:  (header_values[:default] == match[:name]),
+          location: match[:location],
         }
       end
     end
